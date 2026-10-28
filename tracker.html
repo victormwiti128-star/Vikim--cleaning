@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vikim Staff Tracker</title>
+<style>
+body{font-family:Arial;background:#f0f8ff;margin:0;padding:15px}
+.header{background:#0077cc;color:white;padding:15px;border-radius:10px;text-align:center}
+.card{background:white;padding:15px;border-radius:10px;margin:10px 0}
+input,select{width:100%;padding:12px;margin:6px 0;border:1px solid #ccc;border-radius:8px;box-sizing:border-box}
+button{background:#0077cc;color:white;padding:12px;border:none;border-radius:8px;width:100%;font-weight:bold}
+button.green{background:#00aa44}
+.stats{display:flex;gap:10px}
+.stat{flex:1;background:white;padding:10px;border-radius:10px;text-align:center}
+.stat b{font-size:20px;color:#0077cc;display:block}
+.hidden{display:none}
+.item{border-left:4px solid #0077cc;padding:8px;margin:8px 0;background:#f9f9f9}
+</style>
+</head>
+<body>
+<div id="login">
+<div class="header"><h2>VIKIM STAFF LOGIN</h2><p>For Victor - Makutano</p></div>
+<div class="card">
+<input type="password" id="pin" placeholder="Enter PIN 0717">
+<button onclick="login()">Login</button>
+</div>
+</div>
+<div id="app" class="hidden">
+<div class="header"><h2>VIKIM TRACKER</h2><p>One-on-One - Nanyuki</p></div>
+<div class="stats">
+<div class="stat"><b id="total">0</b>Reached</div>
+<div class="stat"><b id="inter">0</b>Interested</div>
+<div class="stat"><b id="orders">0</b>Orders</div>
+</div>
+<div class="card">
+<h3>+ Add Person</h3>
+<input id="name" placeholder="Name">
+<input id="estate" placeholder="Estate e.g. Likii">
+<input id="phone" placeholder="Phone 07...">
+<select id="status">
+<option>New</option><option>Interested</option><option>Ordered</option><option>Not Interested</option>
+</select>
+<input id="note" placeholder="What they said?">
+<button class="green" onclick="add()">Save Customer</button>
+</div>
+<div class="card">
+<input id="search" placeholder="Search name or estate" onkeyup="render()">
+<div id="list"></div>
+</div>
+</div>
+<script>
+let customers=JSON.parse(localStorage.getItem('vikim_c')||'[]');
+function login(){if(pin.value=='0717'){loginDiv();}else alert('PIN is 0717')}
+function loginDiv(){document.getElementById('login').classList.add('hidden');document.getElementById('app').classList.remove('hidden');render()}
+function add(){
+let c={id:Date.now(),name:name.value,estate:estate.value,phone:phone.value,status:status.value,note:note.value,date:new Date().toLocaleDateString()};
+if(!c.name||!c.phone){alert('Name & Phone needed');return;}
+customers.unshift(c);localStorage.setItem('vikim_c',JSON.stringify(customers));
+name.value=estate.value=phone.value=note.value='';render();
+}
+function render(){
+let f=search.value.toLowerCase();list.innerHTML='';total.innerText=customers.length;
+inter.innerText=customers.filter(x=>x.status=='Interested').length;
+orders.innerText=customers.filter(x=>x.status=='Ordered').length;
+customers.filter(c=>(c.name+c.estate).toLowerCase().includes(f)).forEach(c=>{
+let d=document.createElement('div');d.className='item';
+d.innerHTML=`<b>${c.name}</b> - ${c.estate}<br>📞 ${c.phone} | ${c.status}<br><small>${c.note} | ${c.date}</small><br><a href="https://wa.me/254${c.phone.slice(-9)}?text=Habari ${c.name}, ni Victor wa Vikim Cleaning Makutano. Ulisema ${c.note}. Niko na pickup leo, nikupitie?" style="color:green">→ WhatsApp</a> <span onclick="del(${c.id})" style="color:red"> | Delete</span>`;
+list.appendChild(d);
+});
+}
+function del(id){customers=customers.filter(c=>c.id!=id);localStorage.setItem('vikim_c',JSON.stringify(customers));render();}
+</script>
+</body>
+</html>
